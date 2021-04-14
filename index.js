@@ -1,11 +1,24 @@
-import { NativeModules } from 'react-native';
+import { NativeModules, Platform } from 'react-native';
 
-export default (url) => {
-  if (!global.nativeCallSyncHook) {
-    return url
+const { RNVideoCache } = NativeModules;
+
+export const convertToProxyURL = url => {
+  if (Platform.OS === 'ios' || Platform.OS === 'android') {
+    return RNVideoCache.convertToProxyURL(url);
   }
-  return NativeModules.VideoCache.convert(url)
+  return Promise.resolve(url);
 };
 
-export const convertAsync = NativeModules.VideoCache.convertAsync;
+export const cacheRequestURL = url => {
+  if (Platform.OS === 'ios' || Platform.OS === 'android') {
+    return RNVideoCache.cacheRequestURL(url);
+  }
+  return Promise.resolve(url);
+};
 
+export const checkExistedURL = url => {
+  if (Platform.OS === 'ios' || Platform.OS === 'android') {
+    return RNVideoCache.checkExistedURL(url);
+  }
+  return Promise.resolve(url);
+};

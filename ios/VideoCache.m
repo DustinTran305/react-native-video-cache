@@ -1,23 +1,16 @@
-#import "VideoCache.h"
+#import "RNVideoCache.h"
 #import <KTVHTTPCache/KTVHTTPCache.h>
 
-@implementation VideoCache
+@implementation RNVideoCache
 
-RCT_EXPORT_MODULE()
+RCT_EXPORT_MODULE();
 
-RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(convert:(NSString *)url)
+- (dispatch_queue_t)methodQueue
 {
-    if (!KTVHTTPCache.proxyIsRunning) {
-      NSError *error;
-      [KTVHTTPCache proxyStart:&error];
-      if (error) {
-        return url;
-      }
-    }
-    return [KTVHTTPCache proxyURLWithOriginalURL:[NSURL URLWithString:url]].absoluteString;
+  return dispatch_get_main_queue();
 }
 
-RCT_EXPORT_METHOD(convertAsync:(NSString *)url
+RCT_EXPORT_METHOD(convertToProxyURL:(NSString *)url
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
@@ -30,6 +23,29 @@ RCT_EXPORT_METHOD(convertAsync:(NSString *)url
     }
   }
   resolve([KTVHTTPCache proxyURLWithOriginalURL:[NSURL URLWithString:url]].absoluteString);
+}
+
+RCT_EXPORT_METHOD(cacheRequestURL:(NSString *)url
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    KTVHCDataLoader *_dataLoader = [KTVHTTPCache cacheLoaderWithRequest:[[KTVHCDataRequest alloc] initWithURL:[NSURL URLWithString:url] headers:nil]];
+    
+    [_dataLoader prepare];
+}
+
+RCT_EXPORT_METHOD(checkExistedURL:(NSString *)url
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    resolve([KTVHTTPCache cacheCompleteFileURLWithURL:[NSURL URLWithString:url]].absoluteString);
+}
+
+RCT_EXPORT_METHOD(cacheSetMaxLength:(long long)num
+                  callback: (RCTResponseSenderBlock)callback)
+{
+
+   
 }
 
 @end
